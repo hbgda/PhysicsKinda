@@ -1,0 +1,6 @@
+[submodule "physics_core_macro"]
+	path = physics_core_macro
+	url = ./physics_core_macro
+[submodule "quirkythings"]
+	path = quirkythings
+	url = ./quirkythings
