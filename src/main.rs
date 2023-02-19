@@ -5,15 +5,16 @@ use struct_extension::*;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 
-use physics_core::core::entity::{PhysicsEntity, _EXTEND_FIELD_DEFS_PhysicsEntity_};
+use crate::core::physics::entity::PhysicsEntity;
 
 #[extend(PhysicsEntity)]
 struct Player {}
 
 fn main() {
     Player {
-    }.ligma();
-    println!("{}", G);
+        position: todo!(),
+        velocity: todo!(),
+    };
 
     // let mut renderer = core::renderer::Renderer::init();
    

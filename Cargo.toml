@@ -5,7 +5,13 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[workspace]
+members = ["struct_extension"]
+
 [dependencies]
 sdl2 = "0.35.2"
-physics_core = { path = "./physics_core" }
+struct_extension = { path = "./struct_extension" }
+
+[workspace.dependencies]
+sdl2 = "0.35.2"
 struct_extension = { path = "./struct_extension" }
