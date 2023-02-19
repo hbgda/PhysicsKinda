@@ -9,8 +9,8 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use syn::{DeriveInput, parse::Parser};
 
-#[proc_macro_derive(Entity)]
-pub fn entity(input: TokenStream) -> TokenStream {
+#[proc_macro_attribute]
+pub fn physics_entity(_args: TokenStream, input: TokenStream) -> TokenStream {
     let mut ast = parse_macro_input!(input as DeriveInput);
 
     match &mut ast.data {
@@ -20,21 +20,33 @@ pub fn entity(input: TokenStream) -> TokenStream {
                     fields.named.push(
                         syn::Field::parse_named.parse2(quote! {pub position: (u32, u32)}).unwrap()
                     );
-                    fields.named.extend(vec![
-                        syn::Field::parse_named.parse2(tokens)
-                    ])
                 },
                 _ => {()}
             }
-            return quote! {
-                #ast
-                impl #ast.ident {
-                    pub fn set_position(&mut self, pos: (u32, u32)) {
-
-                    }
-                }
-            }.into();
         },
         _ => panic!("Entity must be derived on a struct!")
     }
+
+    return quote! {
+        #[derive(Entity)]
+        #ast
+    }.into();
+}
+
+#[proc_macro_derive(Entity)]
+pub fn entity(input: TokenStream) -> TokenStream {
+    let ast = parse_macro_input!(input as DeriveInput);
+
+    let name = &ast.ident;
+
+    quote! {
+        impl EntityType for #name {
+            fn set_position(&mut self, pos: (u32, u32)) {
+                self.position = pos;
+            }
+            fn get_position(&self) -> (u32, u32) {
+                self.position
+            }
+        }
+    }.into()
 }

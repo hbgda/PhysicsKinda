@@ -1,10 +1,13 @@
 [package]
-name = "quirkythings"
+name = "struct_extension"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sdl2 = "0.35.2"
-physics_core = { path = "../phsyics_core" }
+quote = "1.0.23"
+syn = "1.0.107"
+
+[lib]
+proc-macro = true
