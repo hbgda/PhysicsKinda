@@ -11,13 +11,13 @@ use crate::core::physics::{engine::Engine, entity::PhysicsEntity};
 struct Player {}
 
 fn main() {
-    let mut p = Player {
-        position: (0.0, 0.0),
-        velocity: (0.0, 0.0),
+    let p = Player {
+        position: (0, 0),
+        velocity: (0, 0),
     };
     
-    let mut engine = Engine::new();
-    engine.register_entity::<Player>(&mut p);
+    let engine = Engine::new();
+    engine.register_entity::<Player>(&p);
     // let mut renderer = core::renderer::Renderer::init();
    
     // renderer.present();
