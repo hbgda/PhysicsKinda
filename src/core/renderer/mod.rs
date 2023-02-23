@@ -2,19 +2,22 @@ pub mod ext;
 
 use sdl2::{self, pixels::Color, rect::Rect};
 
-use super::physics::entity::PhysicsEntity;
+use self::ext::entity::PhysicsEntityExt;
+
+use super::physics::{entity::PhysicsEntity, vector::Vector};
 
 pub struct Renderer {
+    pub viewport: Vector<u32>,
     pub sdl_context: sdl2::Sdl,
     pub canvas: sdl2::render::WindowCanvas
 }
 
 impl Renderer {
-    pub fn init() -> Self {
+    pub fn init(width: u32, height: u32) -> Self {
         let sdl_context = sdl2::init().unwrap();
         let video = sdl_context.video().unwrap();
 
-        let window = video.window("Tings innit", 800, 600)
+        let window = video.window("Tings innit", width, height)
             .position_centered()
             .opengl()
             .build()
@@ -25,7 +28,7 @@ impl Renderer {
             .map_err(|e| e.to_string()).unwrap();
 
         Renderer {
-            sdl_context, canvas
+            sdl_context, canvas, viewport: Vector::<u32>::new(width, height)
         }
     }
 
@@ -47,7 +50,7 @@ impl Renderer {
     }
 
     pub fn draw_entity(&mut self, entity: &PhysicsEntity) {
-        let rect: Rect = entity.into();
+        let rect: Rect = entity.to_rect(self.viewport);
         let _ = self.canvas.fill_rect(rect);        
     }
 }

@@ -14,11 +14,11 @@ fn main() {
     let mut engine = Engine::new();
 
     let (_, e) = engine.entities.create_entity();
-    e.position.set(10, 10);
+    e.position.set(0, 0);
     e.size.set(20, 20);
     e.velocity.set(1, 0);
 
-    let mut renderer = core::renderer::Renderer::init();
+    let mut renderer = core::renderer::Renderer::init(800, 600);
 
     let mut event_pump = renderer.sdl_context.event_pump().unwrap();
 
