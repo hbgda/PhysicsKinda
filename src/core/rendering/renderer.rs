@@ -1,7 +1,6 @@
 use std::rc::Rc;
 
-use sdl2::event::WindowEvent;
-use sdl2::render::{WindowCanvas, TextureCreator, TextureQuery};
+use sdl2::render::{TextureCreator, TextureQuery};
 use sdl2::video::WindowContext;
 use sdl2::{self, pixels::Color, rect::Rect};
 use sdl2::messagebox::*;

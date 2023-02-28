@@ -1,6 +1,4 @@
-use std::{sync::{Mutex, atomic::{AtomicUsize, Ordering}}, collections::HashMap, fmt::Error};
-
-use super::{entity::*, entity_manager::{EntityManager, EntityID}, engine_properties::EngineProperties, units::METER, collision::Collision};
+use super::{entity_manager::{EntityManager, EntityID}, properties::engine_props::EngineProperties, units::{METER, TPS}, collision::Collision};
 use super::vector::Vector;
 use crate::core::rendering::ext::entity::PhysicsEntityExt;
 
@@ -17,7 +15,7 @@ impl Engine {
         Engine {
             entities: EntityManager::new(),
             viewport: Vector::<u32>::new(800, 600),
-            properties: EngineProperties { gravity: (4 * METER) / 60 },
+            properties: EngineProperties { gravity: (4 * METER as i32) / TPS as i32 },
             collision: Collision::new()
         }
     }
@@ -36,18 +34,38 @@ impl Engine {
         }
         self.update_collision();
     }
-
+    
     fn update_collision(&mut self) {
         let ids = self.entities.ids();
         for id in &ids {
+            // dbg!(id.0);
             for other in &ids {
                 if id != other {
-                    let (does_collide, collision_axis, amount) = self.collision.check_collision(
+                    let intersection = self.collision.check_collision(
                         self.entities.get_entity(*id).unwrap().to_rect(self.viewport),
                         self.entities.get_entity(*other).unwrap().to_rect(self.viewport) 
                     );
-                    if does_collide {
-                        self.entities.get_entity_mut(*id).unwrap().position += Vector::<i32>::new(0, -50);
+                    if !intersection.0 {
+                        if let Some(rect) = intersection.1 {
+                            // dbg!(id.0, rect);
+                            let entity = self.entities.get_entity_mut(*id).unwrap();
+                            if entity.velocity.x() > 0 {
+                                entity.position -= Vector::<i32>::new(rect.w, 0);
+                            }
+                            else if entity.velocity.x() < 0 {
+                                entity.position += Vector::<i32>::new(rect.w, 0);
+                            }
+
+                            if entity.velocity.y() > 0 {
+                                entity.position -= Vector::<i32>::new(0, rect.h);
+                            }
+                            else if entity.velocity.y() < 0 {
+                                entity.position += Vector::<i32>::new(0, rect.h);
+                            }
+                            // entity.position -= Vector::<i32>::new(0, rect.h);
+                            println!("ID: {:?}, POS: {:?}, RECT: {:?}", id, entity.position, rect);
+                            entity.velocity = Vector::<i32>::new(0, 0);
+                        }
                     }
                 }
             }
@@ -66,7 +84,9 @@ impl Engine {
 
         let entity = maybe_entity.unwrap();
         entity.position += entity.velocity;
-        entity.velocity += Vector::<i32>::new(0, self.properties.gravity as i32);
+        if entity.properties.gravity {
+            entity.velocity += Vector::<i32>::new(0, self.properties.gravity);
+        }
         entity.bound(self.viewport);
 
         Ok(())

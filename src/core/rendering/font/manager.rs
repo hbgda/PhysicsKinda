@@ -1,5 +1,4 @@
 use sdl2::ttf::{Sdl2TtfContext, Font};
-use std::{collections::HashMap, rc::Rc};
 
 pub struct FontManager {
     ttf: Sdl2TtfContext,

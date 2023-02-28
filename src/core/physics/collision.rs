@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::atomic::{AtomicUsize, Ordering}, hash};
+use std::{collections::HashMap, sync::atomic::{AtomicUsize, Ordering}};
 
 use sdl2::rect::Rect;
 
@@ -24,7 +24,7 @@ impl CollisionPair {
 }
 
 pub struct Collision {
-    collision_cache: HashMap<CollisionPair, bool>,
+    collision_cache: HashMap<CollisionPair, Option<Rect>>,
     collider_ids: HashMap<Rect, usize>,
     _id_gen: AtomicUsize
 }
@@ -39,25 +39,20 @@ impl Collision {
         self.collision_cache.clear();
     }
 
-    pub fn check_collision(&mut self, a: Rect, b: Rect) -> (bool, (bool, bool), usize) {
+    pub fn check_collision(&mut self, a: Rect, b: Rect) -> (bool, Option<Rect>) {
         let pair = self.make_pair(a, b);
-        if self.check_cached(pair) {
-            return (true, (false, true), 0);
+        if let Some(found) = self.check_cached(pair) {
+            return (true, found);
         }
-        let does_collide = a.has_intersection(b);
-
-        
-        // Rect::intersection(&self, other)
-
-
-        self.collision_cache.insert(pair, does_collide);
-        (does_collide, (false, true), 0)
+        let intersection = a.intersection(b);
+        self.collision_cache.insert(pair, intersection);
+        (false, intersection)
     }
 
-    fn check_cached(&self, pair: CollisionPair) -> bool {
+    fn check_cached(&self, pair: CollisionPair) -> Option<Option<Rect>> {
         match self.collision_cache.get(&pair) {
-            Some(col) => dbg!(*col),
-            None => false
+            Some(col) => Some(*col),
+            None => None
         }       
     }
 

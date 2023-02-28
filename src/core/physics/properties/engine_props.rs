@@ -1,3 +1,3 @@
 pub struct EngineProperties {
-    pub gravity: u32
+    pub gravity: i32
 }
