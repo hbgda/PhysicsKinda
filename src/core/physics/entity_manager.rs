@@ -26,7 +26,7 @@ impl EntityManager {
 
     pub fn create_entity(&mut self) -> (EntityID, &mut PhysicsEntity) {
         let id = self.generate_id();
-        let entity = PhysicsEntity::empty();
+        let entity = PhysicsEntity::default();
         self._registry.insert(
             id, 
             entity

@@ -1,16 +1,17 @@
-#[derive(Debug, Copy, Clone, PartialEq)]
-pub struct Vector<T>((T, T))
-where 
-    T: std::ops::Add<Output = T> + std::ops::Sub<Output = T> + Copy;
+pub trait VectorType: std::ops::Add<Output = Self> + std::ops::Sub<Output = Self> + std::ops::Div<Output = Self> + std::ops::Mul<Output = Self> + Copy {}
 
-impl<T> Vector<T> 
-where 
-    T: std::ops::Add<Output = T> + std::ops::Sub<Output = T> + Copy + Copy
-{
+impl<T> VectorType for T where T: std::ops::Add<Output = Self> + std::ops::Sub<Output = Self> + std::ops::Div<Output = Self> + std::ops::Mul<Output = Self> + Copy {}
+
+#[derive(Debug, Copy, Clone, PartialEq)]
+pub struct Vector<T: VectorType>((T, T));
+
+impl<T: VectorType> Vector<T> {
     pub fn new(x: T, y: T) -> Self {
         Vector((x, y))
     }
-pub fn x(&self) -> T { self.0.0
+
+    pub fn x(&self) -> T {
+        self.0.0
     }
 
     pub fn y(&self) -> T {
@@ -20,57 +21,76 @@ pub fn x(&self) -> T { self.0.0
     pub fn set(&mut self, x: T, y: T) {
         self.0 = (x, y)
     }
-
 }
 
-impl<T> std::ops::Add<Self> for Vector<T>
-where 
-    T: std::ops::Add<Output = T> + std::ops::Sub<Output = T> + Copy
-{
+impl<T: VectorType> std::ops::Add<Self> for Vector<T> {
     type Output = Vector<T>;
 
     fn add(self, rhs: Self) -> Self::Output {
-        Vector ((
-            self.x() + rhs.x(),
-            self.y() + rhs.y()
-        ))
-    }
-}
-
-impl<T> std::ops::AddAssign<Self> for Vector<T> 
-where 
-    T: std::ops::Add<Output = T> + std::ops::Sub<Output = T> + Copy
-{
-    fn add_assign(&mut self, rhs: Self) {
-        self.set(
-            self.x() + rhs.x(),
-            self.y() + rhs.y()
+        Vector((
+            self.x() + rhs.x(), 
+            self.y() + rhs.y())
         )
     }
 }
 
-impl<T> std::ops::Sub<Self> for Vector<T> 
-where 
-    T: std::ops::Add<Output = T> + std::ops::Sub<Output = T> + Copy
-{
+impl<T: VectorType> std::ops::AddAssign<Self> for Vector<T> {
+    fn add_assign(&mut self, rhs: Self) {
+        let (x, y) = (*self + rhs).0;
+        self.set(x, y);
+    }
+}
+
+impl<T: VectorType> std::ops::Sub<Self> for Vector<T> {
     type Output = Vector<T>;
 
     fn sub(self, rhs: Self) -> Self::Output {
+        Vector((
+            self.x() - rhs.x(), 
+            self.y() - rhs.y())
+        )
+    }
+}
+
+impl<T: VectorType> std::ops::SubAssign<Self> for Vector<T> {
+    fn sub_assign(&mut self, rhs: Self) {
+        let (x, y) = (*self - rhs).0;
+        self.set(x, y);
+    }
+}
+
+impl<T: VectorType> std::ops::Div<Self> for Vector<T> {
+    type Output = Vector<T>;
+
+    fn div(self, rhs: Self) -> Self::Output {
         Vector ((
-            self.x() - rhs.x(),
-            self.y() - rhs.y()
+            self.x() / rhs.x(),
+            self.y() / rhs.y()
         ))
     }
 }
 
-impl<T> std::ops::SubAssign<Self> for Vector<T> 
-where 
-    T: std::ops::Add<Output = T> + std::ops::Sub<Output = T> + Copy
-{
-    fn sub_assign(&mut self, rhs: Self) {
-        self.set(
-            self.x() - rhs.x(),
-            self.y() - rhs.y()
-        )
+impl<T: VectorType> std::ops::DivAssign<Self> for Vector<T> {
+    fn div_assign(&mut self, rhs: Self) {
+        let (x, y) = (*self / rhs).0;
+        self.set(x, y);
+    }
+}
+
+impl<T: VectorType> std::ops::Mul<Self> for Vector<T> {
+    type Output = Vector<T>;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        Vector((
+            self.x() * rhs.x(),
+            self.y() * rhs.y()
+        ))
+    }
+}
+
+impl<T: VectorType> std::ops::MulAssign<Self> for Vector<T> {
+    fn mul_assign(&mut self, rhs: Self) {
+        let (x, y) = (*self * rhs).0;
+        self.set(x, y);
     }
 }
