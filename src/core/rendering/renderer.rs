@@ -63,11 +63,15 @@ impl Renderer {
 
     pub fn update(&mut self, entities: &Vec<&PhysicsEntity>, event_pump: &sdl2::EventPump) {
         if self.debug {
-            self.draw_debug(event_pump);
+            self.draw_debug_pre(event_pump);
         }
 
         for entity in entities {
             self.draw_entity(entity);
+        }
+
+        if self.debug {
+            self.draw_debug_post(event_pump);
         }
     }
 
@@ -79,11 +83,12 @@ impl Renderer {
 }
 
 impl Renderer {
-    pub fn draw_debug(&mut self, event_pump: &sdl2::EventPump) {
+    pub fn draw_debug_pre(&mut self, event_pump: &sdl2::EventPump) {
         // Draw grid
         self.debug_draw_grid();
+    }
 
-        // Draw mouse pos
+    pub fn draw_debug_post(&mut self, event_pump: &sdl2::EventPump) {
         self.debug_draw_mouse_pos(event_pump);
     }
 
