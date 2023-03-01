@@ -134,12 +134,15 @@ impl Renderer {
 
             let width = width / 5;
             let height = height / 5;
+            let x = (self.viewport.x() - width) as i32;
+            let y = 0;
+
+            self.canvas.set_draw_color(Color::RGBA(35, 35, 35, 100));
             let rect = Rect::new(
-                (self.viewport.x() - width) as i32,
-                (self.viewport.y() - height) as i32,
+                x, y, 
                 width, height
             );
-
+            let _ = self.canvas.fill_rect(rect);
             let _ = self.canvas.copy(&texture, None, rect);
         }
         else {

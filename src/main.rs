@@ -14,20 +14,19 @@ use crate::core::rendering::renderer::Renderer;
 const FRAME_TIME: Duration = Duration::from_millis(1_000 / TPS as u64);
 
 fn main() {
-    
-    let mut engine = Engine::new();
+    let viewport = Vector::<u32>::new(850, 600);
+    let mut engine = Engine::new(viewport);
 
     let (id, e) = engine.entities.create_entity();
     e.position.set(0, -100);
     e.size.set(20, 20);
     e.velocity.set(0, 0);
 
-    let (_, floor) = engine.entities.create_entity();
-    floor.size.set(800, 50);
-    floor.position.set(0, 230);
-    floor.properties.gravity = false;
+    let (id2, e2) = engine.entities.create_entity();
+    e2.position.set(300, 100);
+    e2.size.set(30, 30);
 
-    let (sdl, mut renderer) = Renderer::init(850, 600, true);
+    let (sdl, mut renderer) = Renderer::init(viewport.x(), viewport.y(), true);
 
     let mut event_pump = sdl.event_pump().unwrap();
 
@@ -40,7 +39,7 @@ fn main() {
                     ..
                 } => break 'event_loop,
                 Event::KeyDown { keycode: Some(Keycode::Space), .. } => {
-                    engine.entities.get_entity_mut(id).unwrap().position += Vector::<i32>::new(0, 15);
+                    engine.entities.get_entity_mut(id).unwrap().position += Vector::<i32>::new(5, 0);
                 },
                 Event::MouseButtonDown { mouse_btn: MouseButton::Left, x, y, .. } => {
                     let (id, new_entity) = engine.entities.create_entity();
