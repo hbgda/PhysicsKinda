@@ -137,7 +137,7 @@ impl Renderer {
             let x = (self.viewport.x() - width) as i32;
             let y = 0;
 
-            self.canvas.set_draw_color(Color::RGBA(35, 35, 35, 100));
+            self.canvas.set_draw_color(Color::RGB(35, 35, 35));
             let rect = Rect::new(
                 x, y, 
                 width, height

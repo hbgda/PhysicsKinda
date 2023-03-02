@@ -23,7 +23,7 @@ fn main() {
     e.velocity.set(0, 0);
 
     let (id2, e2) = engine.entities.create_entity();
-    e2.position.set(300, 100);
+    e2.position.set(300, -100);
     e2.size.set(30, 30);
 
     let (sdl, mut renderer) = Renderer::init(viewport.x(), viewport.y(), true);
@@ -39,7 +39,7 @@ fn main() {
                     ..
                 } => break 'event_loop,
                 Event::KeyDown { keycode: Some(Keycode::Space), .. } => {
-                    engine.entities.get_entity_mut(id).unwrap().position += Vector::<i32>::new(5, 0);
+                    engine.entities.get_entity_mut(id).unwrap().velocity += Vector::<i32>::new(5, 0);
                 },
                 Event::MouseButtonDown { mouse_btn: MouseButton::Left, x, y, .. } => {
                     let (id, new_entity) = engine.entities.create_entity();
