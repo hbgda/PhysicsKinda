@@ -44,8 +44,8 @@ fn main() {
                 Event::MouseButtonDown { mouse_btn: MouseButton::Left, x, y, .. } => {
                     let (id, new_entity) = engine.entities.create_entity();
                     new_entity.position.set(
-                        x - (renderer.viewport.x() / 2) as i32,
-                        y - (renderer.viewport.y() / 2) as i32 
+                        x - (renderer.engine_viewport.x() / 2) as i32,
+                        y - (renderer.engine_viewport.y() / 2) as i32 
                     );
                     new_entity.size.set(20, 20);
                     println!("Created new entity: {:?} at X: {x}, Y: {y}", id);

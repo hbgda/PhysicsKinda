@@ -11,7 +11,8 @@ use super::{ext::entity::PhysicsEntityExt, font::{manager::FontManager, presets}
 use crate::core::physics::{entity::PhysicsEntity, vector::Vector};
 
 pub struct Renderer {
-    pub viewport: Vector<u32>,
+    pub engine_viewport: Vector<u32>,
+    pub screen: Vector<u32>,
     // pub sdl_context: sdl2::Sdl,
     pub canvas: sdl2::render::WindowCanvas,
     font_manager: FontManager,
@@ -48,7 +49,12 @@ impl Renderer {
         // let texture_manager = TextureManager::new(Rc::new(texture_creator));
 
         (sdl_context, Renderer {
-            canvas, viewport: Vector::<u32>::new(width, height), font_manager: FontManager::new(ttf_context), texture_creator: Rc::new(texture_creator), debug
+            canvas, 
+            engine_viewport: Vector::<u32>::new(width, height), 
+            screen: Vector::<u32>::new(window_width, window_height),
+            font_manager: FontManager::new(ttf_context), 
+            texture_creator: Rc::new(texture_creator), 
+            debug
         })
     }
 
@@ -83,7 +89,7 @@ impl Renderer {
 
     pub fn draw_entity(&mut self, entity: &PhysicsEntity) {
         self.canvas.set_draw_color(Color::WHITE);
-        let rect: Rect = entity.to_rect(self.viewport);
+        let rect: Rect = entity.to_rect(self.engine_viewport);
         let _ = self.canvas.fill_rect(rect);        
     }
 }
@@ -102,18 +108,18 @@ impl Renderer {
         self.canvas.set_draw_color(Color::GREY);
         
         let cell_size = 50;
-        let x_cells = self.viewport.x() / cell_size;
-        let x_cell_offset = self.viewport.x() - (x_cells * cell_size);
+        let x_cells = self.engine_viewport.x() / cell_size;
+        let x_cell_offset = self.engine_viewport.x() - (x_cells * cell_size);
         let x_offset = cell_size - x_cell_offset / 2;  
 
-        let y_cells = self.viewport.y() / cell_size;
-        let y_cell_offset = self.viewport.y() - (y_cells * cell_size);
+        let y_cells = self.engine_viewport.y() / cell_size;
+        let y_cell_offset = self.engine_viewport.y() - (y_cells * cell_size);
         let y_offset = cell_size - y_cell_offset / 2;
 
         let mut y = 0;   
-        while y < self.viewport.y() + y_offset {
+        while y < self.engine_viewport.y() + y_offset {
             let mut x = 0;
-            while x < self.viewport.x() + x_offset {
+            while x < self.engine_viewport.x() + x_offset {
                 let rect = Rect::new(x as i32 - x_offset as i32, y as i32 - y_offset as i32, cell_size, cell_size);
                 let _ = self.canvas.draw_rect(rect);
                 x += cell_size;
@@ -140,7 +146,7 @@ impl Renderer {
 
             let width = width / 5;
             let height = height / 5;
-            let x = (self.viewport.x() - width) as i32;
+            let x = (self.screen.x() - width) as i32;
             let y = 0;
 
             self.canvas.set_draw_color(Color::RGB(35, 35, 35));
