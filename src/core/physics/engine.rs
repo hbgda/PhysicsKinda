@@ -25,6 +25,7 @@ impl Engine {
 
         floor.size.set(viewport.x(), 5);
         floor.position.set(0, (viewport.y() / 2) as i32 - 1);
+        floor.properties.gravity = false;
         engine
     }
 
@@ -39,7 +40,6 @@ impl Engine {
         let ids = self.entities.ids();
         for id in &ids {
             let _ = self.update_entity(*id);
-            let _ = self.update_collision(*id);
         }
     }
 
@@ -129,23 +129,59 @@ impl Engine {
         }
     }
 
-    fn update_entity(&mut self, id: EntityID) -> Result<(), String>
+    fn update_entity(&mut self, entity_id: EntityID) -> Result<(), String>
     {
         // Just basic currently, may eventually be updated to include various physical elements
         // such as air resistance, gravity, acceleration etc
         
-        let maybe_entity = self.entities.get_entity_mut(id);
+        let maybe_entity = self.entities.get_entity_mut(entity_id);
         if let None = maybe_entity {
-            return Err(format!("Unknown entity of id {:?}", &id))
+            return Err(format!("Unknown entity of id {:?}", &entity_id))
         }
 
         let entity = maybe_entity.unwrap();
         entity.position += entity.velocity;
+
         if entity.properties.gravity {
             entity.velocity += Vector::<i32>::new(0, self.properties.gravity);
         }
-        entity.bound(self.viewport);
+        // entity.bound(self.viewport);
 
+        self.update_entity_collision(entity_id);
         Ok(())
+    }
+
+    fn update_entity_collision(&mut self, entity_id: EntityID) {
+        let entity_rect = self.entities.get_entity(entity_id).unwrap().to_rect(self.viewport);
+        for other in self.entities.ids() {
+            if entity_id == other {
+                continue;
+            }
+            let other_rect = self.entities.get_entity(other).unwrap().to_rect(self.viewport);
+            if let Some(intersect) = entity_rect.intersection(other_rect) {
+                dbg!(intersect);
+                let entity = self.entities.get_entity_mut(entity_id).unwrap();
+                let mut adjust = Vector::<i32>::new(0, 0);
+                let mut adjust_vel = entity.velocity;
+                if entity.velocity.x() > 0 {
+                    adjust.set(intersect.w, 0);
+                    adjust_vel.set(0, adjust_vel.y());
+                }
+                else if entity.velocity.x() < 0 {
+                    adjust.set(-intersect.w, 0);
+                    adjust_vel.set(0, adjust_vel.y());
+                }
+                if entity.velocity.y() > 0 {
+                    adjust.set(adjust.x(), intersect.h);
+                    adjust_vel.set(adjust_vel.x(), 0);
+                }
+                else if entity.velocity.y() < 0 {
+                    adjust.set(adjust.x(), -intersect.h);
+                    adjust_vel.set(adjust_vel.x(), 0);
+                }
+                entity.position -= adjust;
+                entity.velocity = adjust_vel;
+            }
+        }
     }
 }
