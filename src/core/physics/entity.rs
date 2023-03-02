@@ -45,20 +45,20 @@ impl PhysicsEntity {
 
         if self.position.x() > max_x {
             self.position.set(max_x, self.position.y());
-            self.velocity.set(0, self.velocity.y());
+            // self.velocity.set(0, self.velocity.y());
         }
         else if self.position.x() < min_x {
             self.position.set(min_x, self.position.y());
-            self.velocity.set(0, self.velocity.y());
+            // self.velocity.set(0, self.velocity.y());
         }
         
         if self.position.y() > max_y {
             self.position.set(self.position.x(), max_y);
-            self.velocity.set(self.velocity.x(), 0);
+            // self.velocity.set(self.velocity.x(), 0);
         }
         else if self.position.y() < min_y {
             self.position.set(self.position.x(), min_y);
-            self.velocity.set(self.velocity.x(), 0);
+            // self.velocity.set(self.velocity.x(), 0);
         }
     }
 }

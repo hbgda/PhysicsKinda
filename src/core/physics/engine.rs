@@ -166,7 +166,7 @@ impl Engine {
             self.entities.get_entity_mut(entity_id).unwrap().position += step;
         }
 
-
+        self.entities.get_entity_mut(entity_id).unwrap().bound(self.viewport);
         Ok(())
     }
 

@@ -28,7 +28,13 @@ impl Renderer {
         let ttf_context = sdl2::ttf::init().unwrap();
         // let mut font = ttf_context.load_font("font/roboto/Roboto-Regular.ttf", 128).unwrap();
 
-        let window = video.window("Tings innit", width, height)
+        let mut window_width = width;
+        let mut window_height = height;
+        if debug {
+            // Add space for debug information
+            window_width += 200; 
+        }
+        let window = video.window("Tings innit", window_width, window_height)
             .position_centered()
             .opengl()
             .build()
