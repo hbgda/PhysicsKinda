@@ -1,5 +1,6 @@
 pub mod core;
 
+use std::time::Instant;
 use std::{thread, time::Duration};
 
 use sdl2::event::Event;
@@ -20,17 +21,14 @@ fn main() {
     let (id, e) = engine.entities.create_entity();
     e.position.set(0, -100);
     e.size.set(20, 20);
-    e.velocity.set(0, 0);
-
-    let (id2, e2) = engine.entities.create_entity();
-    e2.position.set(300, -100);
-    e2.size.set(30, 30);
+    e.velocity.set(5, 0);
 
     let (sdl, mut renderer) = Renderer::init(viewport.x(), viewport.y(), true);
 
     let mut event_pump = sdl.event_pump().unwrap();
 
     'event_loop: loop {
+        let start = Instant::now();
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. } 
@@ -52,12 +50,15 @@ fn main() {
                 }
                 _ => {}
             } 
-        } 
+        }
+        println!("{:?}", engine.entities.get_entity(id).unwrap().velocity);
 
         engine.update();
-
         renderer.refresh(&engine.entities.all(), &event_pump);
 
-        thread::sleep(FRAME_TIME);
+        let elapsed = start.elapsed();
+        if let Some(frame_delay) = FRAME_TIME.checked_sub(elapsed) {    
+            thread::sleep(frame_delay);
+        }
     }
 }

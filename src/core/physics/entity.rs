@@ -1,18 +1,18 @@
 // use struct_extension::extendable;
 use super::vector::Vector;
-use super::properties::entity_props::EntityProperties;
+use super::properties::entity_props::MaterialProperties;
 
 // #[extendable]
 pub struct PhysicsEntity {
     pub position: Vector<i32>,
     pub velocity: Vector<i32>,
     pub size: Vector<u32>,
-    pub properties: EntityProperties
+    pub material: MaterialProperties
 }
 
 impl PhysicsEntity {
     pub fn new(position: Vector<i32>, velocity: Vector<i32>, size: Vector<u32>) -> Self {
-        PhysicsEntity { position, velocity, size, properties: EntityProperties::new() }
+        PhysicsEntity { position, velocity, size, material: MaterialProperties::new() }
     }
 }
 

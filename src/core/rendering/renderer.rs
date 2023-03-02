@@ -90,7 +90,9 @@ impl Renderer {
     pub fn draw_entity(&mut self, entity: &PhysicsEntity) {
         self.canvas.set_draw_color(Color::WHITE);
         let rect: Rect = entity.to_rect(self.engine_viewport);
-        let _ = self.canvas.fill_rect(rect);        
+        let _ = self.canvas.fill_rect(rect);   
+        self.canvas.set_draw_color(Color::RED);
+        let _ = self.canvas.draw_rect(rect);
     }
 }
 

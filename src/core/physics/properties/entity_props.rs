@@ -2,14 +2,15 @@ pub enum PhysicsProperty {
     Static(bool),
 }
 
-pub struct EntityProperties {
+pub struct MaterialProperties {
     pub gravity: bool,
+    pub bounce: u8,
     pub mass: u32, 
     pub extra: Vec<PhysicsProperty>
 }
 
-impl EntityProperties {
+impl MaterialProperties {
     pub fn new() -> Self {
-        EntityProperties { gravity: true, mass: 0, extra: Vec::new() }
+        MaterialProperties { gravity: true, bounce: 255, mass: 0, extra: Vec::new() }
     }
 }
