@@ -8,6 +8,7 @@ use sdl2::messagebox::*;
 // use super::texture::manager::TextureManager;
 use super::{ext::entity::PhysicsEntityExt, font::{manager::FontManager, presets}};
 
+use crate::core::physics::collision::line::Line;
 use crate::core::physics::{entity::PhysicsEntity, vector::Vector};
 
 pub struct Renderer {
@@ -91,8 +92,11 @@ impl Renderer {
         self.canvas.set_draw_color(Color::WHITE);
         let rect: Rect = entity.to_rect(self.engine_viewport);
         let _ = self.canvas.fill_rect(rect);   
-        self.canvas.set_draw_color(Color::RED);
-        let _ = self.canvas.draw_rect(rect);
+    }
+
+    pub fn draw_line(&mut self, p1: (i32, i32), p2: (i32, i32)) {
+        self.canvas.set_draw_color(Color::WHITE);
+        let _ = self.canvas.draw_line(p1, p2);
     }
 }
 

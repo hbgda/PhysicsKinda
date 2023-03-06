@@ -1,6 +1,10 @@
 use std::{collections::{HashMap, hash_map::{Iter, IterMut}}, sync::atomic::{AtomicUsize, Ordering}};
 
-use super::entity::PhysicsEntity;
+use sdl2::rect::Rect;
+
+use crate::core::rendering::ext::entity::PhysicsEntityExt;
+
+use super::{entity::PhysicsEntity, vector::Vector};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct EntityID(pub usize);
@@ -64,5 +68,9 @@ impl EntityManager {
 
     pub fn all(&self) -> Vec<&PhysicsEntity> {
         self._registry.values().collect()
+    }
+
+    pub fn rects(&self, viewport: Vector::<u32>) -> Vec<Rect> {
+        self._registry.iter().map(|(_, e)| e.to_rect(viewport)).collect()
     }
 }

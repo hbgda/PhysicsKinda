@@ -1,6 +1,6 @@
 use sdl2::rect::Rect;
 
-use super::{entity_manager::{EntityManager, EntityID, self}, properties::engine_props::EngineProperties, units::{METER, TPS}, collision::Collision, entity::PhysicsEntity};
+use super::{entity_manager::{EntityManager, EntityID, self}, properties::engine_props::EngineProperties, units::{METER, TPS}, entity::PhysicsEntity, collision};
 use super::vector::Vector;
 use crate::core::rendering::ext::entity::PhysicsEntityExt;
 
@@ -10,7 +10,6 @@ pub struct Engine {
     viewport: Vector<u32>,
     pub entities: EntityManager,
     pub properties: EngineProperties,
-    collision: Collision
 }
 
 impl Engine {
@@ -19,7 +18,6 @@ impl Engine {
             entities: EntityManager::new(),
             viewport,
             properties: EngineProperties { gravity: (2 * METER as i32) / TPS as i32 },
-            collision: Collision::new()
         };
         let(_, floor) = engine.entities.create_entity(); 
         floor.size.set(viewport.x(), 2);
@@ -52,7 +50,6 @@ impl Engine {
 
 impl Engine {
     pub fn update(&mut self) {
-        self.collision.clear();
         let ids = self.entities.ids();
         for id in &ids {
             let _ = self.update_entity(*id);
@@ -77,24 +74,45 @@ impl Engine {
         // self.update_entity_collision(entity_id);
         self.apply_physics(entity_id);
         
-        let entity = self.entities.get_entity(entity_id).unwrap();
-        let mut rect = entity.to_rect(self.viewport);
-        let step = entity.velocity / Vector::<i32>::new(COLLISION_TICKS as i32, COLLISION_TICKS as i32);
-        // println!("{:?}", step);
-        for tick in 0..COLLISION_TICKS {
-            let collisions = self.get_collisions(rect);
-            if collisions.iter().filter(|id| **id != entity_id).count() > 0 {
-                // println!("ID: {:?} Tick {tick} {:?}", entity_id, collisions);
-                self.collide_entities(entity_id, collisions);
-                break;
-            }
-            rect.x += step.x();
-            rect.y += step.y();
-            self.entities.get_entity_mut(entity_id).unwrap().position += step;
-        }
+        // let entity = self.entities.get_entity(entity_id).unwrap();
+        // let mut rect = entity.to_rect(self.viewport);
+        // let step = entity.velocity / Vector::<i32>::new(COLLISION_TICKS as i32, COLLISION_TICKS as i32);
+        // // println!("{:?}", step);
+        // for tick in 0..COLLISION_TICKS {
+        //     let collisions = self.get_collisions(rect);
+        //     if collisions.iter().filter(|id| **id != entity_id).count() > 0 {
+        //         // println!("ID: {:?} Tick {tick} {:?}", entity_id, collisions);
+        //         self.collide_entities(entity_id, collisions);
+        //         break;
+        //     }
+        //     rect.x += step.x();
+        //     rect.y += step.y();
+        //     self.entities.get_entity_mut(entity_id).unwrap().position += step;
+        // }   
+
+        self.handle_collisions(entity_id);
 
         // self.entities.get_entity_mut(entity_id).unwrap().bound(self.viewport);
         Ok(())
+    }
+
+    fn handle_collisions(&mut self, entity_id: EntityID) {
+        let entity = self.entities.get_entity(entity_id).unwrap();
+        let entity_rect = entity.to_rect(self.viewport);
+
+        let entity_dest_rect = PhysicsEntity::new(entity.position + entity.velocity, entity.velocity, entity.size)
+            .to_rect(self.viewport);
+
+        let mut potential_collisions = self.entities.all();
+        potential_collisions.sort_unstable_by(|a, b| 
+            Vector::distance(Vector::new(entity.position.x(), entity.position.y()), Vector::new(a.position.x(), a.position.y())).partial_cmp(
+                &Vector::distance(Vector::new(entity_rect.x, entity_rect.y), Vector::new(b.position.x(), b.position.y()))
+            ).unwrap()
+        );
+
+        for rect in &potential_collisions[1..] {
+                                                                                                                                                                                                                                                                                                                                  
+        }
     }
 
     fn apply_physics(&mut self, entity_id: EntityID) {

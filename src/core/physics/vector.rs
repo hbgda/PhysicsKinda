@@ -1,4 +1,4 @@
-pub trait VectorType: std::ops::Add<Output = Self> + std::ops::Sub<Output = Self> + std::ops::Div<Output = Self> + std::ops::Mul<Output = Self> + Copy {}
+pub trait VectorType: std::ops::Add<Output = Self> + std::ops::Sub<Output = Self> + std::ops::Div<Output = Self> + std::ops::Mul<Output = Self> + Copy { }
 
 impl<T> VectorType for T where T: std::ops::Add<Output = Self> + std::ops::Sub<Output = Self> + std::ops::Div<Output = Self> + std::ops::Mul<Output = Self> + Copy {}
 
@@ -20,6 +20,16 @@ impl<T: VectorType> Vector<T> {
 
     pub fn set(&mut self, x: T, y: T) {
         self.0 = (x, y)
+    }
+
+}
+
+impl Vector<i32> {
+    pub fn distance(a: Vector<i32>, b: Vector<i32>) -> f32 {
+        f32::sqrt(
+           ((a.x() - b.x()) as f32).powf(2.0) +
+           ((a.y() - b.y()) as f32).powf(2.0)  
+        ).abs()
     }
 }
 

@@ -51,7 +51,7 @@ fn main() {
                 _ => {}
             } 
         }
-        println!("{:?}", engine.entities.get_entity(id).unwrap().velocity);
+        // println!("{:?}", engine.entities.get_entity(id).unwrap().velocity);
 
         engine.update();
         renderer.refresh(&engine.entities.all(), &event_pump);
