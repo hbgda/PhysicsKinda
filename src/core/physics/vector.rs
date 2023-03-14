@@ -33,6 +33,12 @@ impl Vector<i32> {
     }
 }
 
+impl <T: VectorType> Into<Vector<T>> for (T, T) {
+    fn into(self) -> Vector<T> {
+        Vector((self.0, self.1))
+    }
+}
+
 impl<T: VectorType> std::ops::Add<Self> for Vector<T> {
     type Output = Vector<T>;
 

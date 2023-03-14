@@ -25,7 +25,7 @@ fn main() {
     let (id, e) = engine.entities.create_entity();
     e.position.set(0, -100);
     e.size.set(20, 20);
-    e.velocity.set(5, 0);
+    e.velocity.set(0, 0);
 
     let (_, e2) = engine.entities.create_entity();
     e2.position.set(0, 200);
