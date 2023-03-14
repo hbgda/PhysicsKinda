@@ -1,4 +1,5 @@
 pub mod core;
+pub mod line_test;
 
 use std::time::Instant;
 use std::{thread, time::Duration};
@@ -15,6 +16,9 @@ use crate::core::rendering::renderer::Renderer;
 const FRAME_TIME: Duration = Duration::from_millis(1_000 / TPS as u64);
 
 fn main() {
+
+    // return line_test::line_test();
+
     let viewport = Vector::<u32>::new(850, 600);
     let mut engine = Engine::new(viewport);
 
@@ -22,6 +26,11 @@ fn main() {
     e.position.set(0, -100);
     e.size.set(20, 20);
     e.velocity.set(5, 0);
+
+    let (_, e2) = engine.entities.create_entity();
+    e2.position.set(0, 200);
+    e2.size.set(850, 10);
+    e2.material.gravity = false;
 
     let (sdl, mut renderer) = Renderer::init(viewport.x(), viewport.y(), true);
 

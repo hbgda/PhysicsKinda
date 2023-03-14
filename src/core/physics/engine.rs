@@ -1,10 +1,9 @@
-use sdl2::rect::Rect;
+use sdl2::rect::{Rect};
 
-use super::{entity_manager::{EntityManager, EntityID, self}, properties::engine_props::EngineProperties, units::{METER, TPS}, entity::PhysicsEntity, collision};
+use super::{entity_manager::{EntityManager, EntityID, self}, properties::engine_props::EngineProperties, units::{METER, TPS}, entity::PhysicsEntity, collision::{self, line::{Point, Line, line_intersect}, rect::{collide_left, collide_top}}};
 use super::vector::Vector;
 use crate::core::rendering::ext::entity::PhysicsEntityExt;
 
-const COLLISION_TICKS: u8 = 4;
 
 pub struct Engine {
     viewport: Vector<u32>,
@@ -14,33 +13,13 @@ pub struct Engine {
 
 impl Engine {
     pub fn new(viewport: Vector<u32>) -> Self {
-        let mut engine = Engine {
+        Engine {
             entities: EntityManager::new(),
             viewport,
-            properties: EngineProperties { gravity: (2 * METER as i32) / TPS as i32 },
-        };
-        let(_, floor) = engine.entities.create_entity(); 
-        floor.size.set(viewport.x(), 2);
-        floor.position.set(0, (viewport.y() / 2) as i32 - 1);
-        floor.material.gravity = false;
-
-        // let(_, cieling) = engine.entities.create_entity();
-        // cieling.size.set(viewport.x(), 2);
-        // cieling.position.set(0, -(viewport.y() as i32 / 2) + 1);
-        // cieling.material.gravity = false;
-
-        let (_, left_wall) = engine.entities.create_entity();
-        left_wall.size.set(2, viewport.y());
-        left_wall.position.set(-(viewport.x() as i32 / 2) + 1, 0);
-        left_wall.material.gravity = false;
-
-        let (_, right_wall) = engine.entities.create_entity();
-        right_wall.size.set(2, viewport.y());
-        right_wall.position.set((viewport.x() as i32 / 2) - 1, 0);
-        right_wall.material.gravity = false;
-
-
-        engine
+            properties: EngineProperties::new(
+                Vector::<i32>::new(0, 2)
+            ),
+        }
     }
 
     pub fn set_viewport(&mut self, width: u32, height: u32) {
@@ -90,36 +69,89 @@ impl Engine {
         //     self.entities.get_entity_mut(entity_id).unwrap().position += step;
         // }   
 
-        self.handle_collisions(entity_id);
+        self.update_position(entity_id);
 
         // self.entities.get_entity_mut(entity_id).unwrap().bound(self.viewport);
         Ok(())
     }
 
-    fn handle_collisions(&mut self, entity_id: EntityID) {
-        let entity = self.entities.get_entity(entity_id).unwrap();
-        let entity_rect = entity.to_rect(self.viewport);
+    fn update_position(&mut self, entity_id: EntityID) {
+        self.handle_collisions(entity_id);
+    }
 
-        let entity_dest_rect = PhysicsEntity::new(entity.position + entity.velocity, entity.velocity, entity.size)
-            .to_rect(self.viewport);
+    fn handle_collisions(&mut self, entity_id: EntityID) -> (i32, i32) {
+        let entity = self.entities.get_entity(entity_id).unwrap();
+        if entity.material.gravity == false {
+            return (0, 0);
+        }
+        let entity_rect = entity.to_rect(Vector::new(0, 0));
 
         let mut potential_collisions = self.entities.all();
         potential_collisions.sort_unstable_by(|a, b| 
             Vector::distance(Vector::new(entity.position.x(), entity.position.y()), Vector::new(a.position.x(), a.position.y())).partial_cmp(
-                &Vector::distance(Vector::new(entity_rect.x, entity_rect.y), Vector::new(b.position.x(), b.position.y()))
+                &Vector::distance(Vector::new(entity.position.x(), entity.position.y()), Vector::new(b.position.x(), b.position.y()))
             ).unwrap()
         );
 
-        for rect in &potential_collisions[1..] {
-                                                                                                                                                                                                                                                                                                                                  
-        }
+        let path = Line(
+            Point { x: entity_rect.x + entity.size.x() as i32, 
+                    y: entity_rect.y + entity.size.y() as i32},
+            Point { x: entity_rect.x + entity.size.x() as i32 + entity.velocity.x(),
+                    y: entity_rect.y + entity.size.y() as i32 + entity.velocity.y()}
+        );
+
+        // let path = Line(
+        //     Point { x: entity.position.x(), 
+        //             y: entity.position.y() },
+        //     Point { x: entity.position.x() + entity.velocity.x(),
+        //             y: entity.position.y() + entity.velocity.y() }
+        // );
+
+        // let entity_rect_cartesian = entity.to_rect(Vector::new(0, 0));
+        let mut entity_pos = entity.position + entity.velocity;
+        let mut entity_vel = entity.velocity;
+        for other in &potential_collisions[1..] {
+            let other_rect = other.to_rect(Vector::new(0, 0));
+            
+            // dbg!(other.position.y(), other_rect.y);
+            
+            if entity.velocity.y() > 0 {
+                // println!("ligma");
+                // dbg!(path.1.y);
+                // dbg!(other_rect.y);
+                // if let Some(_) = line_intersect(path, )
+                if let Some(_) = collide_top(other_rect, path) {
+                    entity_pos.set(
+                        entity_pos.x(), 
+                        other.position.y() - other.size.y() as i32 / 2
+                        - entity.size.y() as i32 / 2
+                    );
+                    entity_vel.set(entity_vel.x(), 0);
+                }
+            }
+            if entity.velocity.x() > 0 {
+                if let Some(_) = collide_left(other_rect, path) {
+                    entity_pos.set(
+                        other.position.x() - other.size.x() as i32 / 2
+                        - entity.size.x() as i32 / 2,
+                        entity_pos.y() 
+                    );
+                    entity_vel.set(0, entity_vel.y());
+                }
+            }
+        }   
+        
+        let entity = self.entities.get_entity_mut(entity_id).unwrap();
+        entity.position = entity_pos;
+        entity.velocity = entity_vel;
+        (0, 0)
     }
 
     fn apply_physics(&mut self, entity_id: EntityID) {
         let entity = self.entities.get_entity_mut(entity_id).unwrap();
 
         if entity.material.gravity {
-            entity.velocity += Vector::<i32>::new(0, self.properties.gravity);
+            entity.velocity += self.properties.gravity;
         }
     }
 

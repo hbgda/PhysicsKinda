@@ -42,7 +42,7 @@ impl Renderer {
             .build()
             .map_err(|e| e.to_string()).unwrap();
 
-        let canvas = window.into_canvas()
+        let mut canvas = window.into_canvas()
             .build()
             .map_err(|e| e.to_string()).unwrap();
 
@@ -92,6 +92,14 @@ impl Renderer {
         self.canvas.set_draw_color(Color::WHITE);
         let rect: Rect = entity.to_rect(self.engine_viewport);
         let _ = self.canvas.fill_rect(rect);   
+        self.canvas.set_draw_color(Color::GREEN);
+        if self.debug {
+            let _ = self.canvas.draw_line(
+                (rect.x + rect.w / 2, rect.y + rect.h / 2),
+                (rect.x + rect.w / 2 + entity.velocity.x() * 2, 
+                rect.y + rect.h / 2 + entity.velocity.y() * 2) 
+            );
+        }
     }
 
     pub fn draw_line(&mut self, p1: (i32, i32), p2: (i32, i32)) {

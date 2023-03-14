@@ -1,12 +1,14 @@
+#[derive(Debug, Clone, Copy)]
 pub struct Point {
     pub x: i32,
     pub y: i32
 }
 
-
+#[derive(Debug, Clone, Copy)]
 pub struct Line(pub Point, pub Point);
 
-pub fn line_intersect(a: &Line, b: &Line) -> Option<(i32, i32)> {
+pub fn line_intersect(a: Line, b: Line) -> Option<(i32, i32)> {
+    // dbg!(a, b);
     let a1 = a.1.y - a.0.y;
     let b1 = a.0.x - a.1.x;
     let c1 = a1 * a.0.x + b1 * a.0.y;
@@ -32,8 +34,8 @@ pub fn line_intersect(a: &Line, b: &Line) -> Option<(i32, i32)> {
     // println!("A1: {a1} B1: {b1} C1: {c1}");
     // println!("A2: {a2} B2: {b2} C2: {c2}");
 
-    if ((ratio_ax >= 0.0 && ratio_ax <= 1.0) && (ratio_ay >= 0.0 && ratio_ay <= 1.0))
-    && ((ratio_bx >= 0.0 && ratio_bx <= 1.0) && (ratio_by >= 0.0 && ratio_by <= 1.0)) {
+    if ((ratio_ax >= 0.0 && ratio_ax <= 1.0) || (ratio_ay >= 0.0 && ratio_ay <= 1.0))
+    && ((ratio_bx >= 0.0 && ratio_bx <= 1.0) || (ratio_by >= 0.0 && ratio_by <= 1.0)) {
         return Some((intersect_x, intersect_y));
     }
     None
