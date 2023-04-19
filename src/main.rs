@@ -27,11 +27,12 @@ fn main() {
     e.size.set(20, 20);
     e.velocity.set(0, 0);
 
+    /*
     let (_, e2) = engine.entities.create_entity();
     e2.position.set(0, 200);
     e2.size.set(850, 10);
     e2.material.gravity = false;
-
+    */
     let (sdl, mut renderer) = Renderer::init(viewport.x(), viewport.y(), true);
 
     let mut event_pump = sdl.event_pump().unwrap();

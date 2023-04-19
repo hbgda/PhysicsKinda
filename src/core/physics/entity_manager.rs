@@ -1,4 +1,5 @@
 use std::{collections::{HashMap, hash_map::{Iter, IterMut}}, sync::atomic::{AtomicUsize, Ordering}};
+use log;
 
 use sdl2::rect::Rect;
 
@@ -36,6 +37,11 @@ impl EntityManager {
             entity
         );
         (id, self.get_entity_mut(id).unwrap())
+    }
+    
+    pub fn destroy(&mut self, entity_id: EntityID) {
+        self._registry.remove(&entity_id).unwrap();
+        println!("Destroyed entity: {entity_id:?}");
     }
 
     pub fn get_entity(&self, id: EntityID) -> Option<&PhysicsEntity> {

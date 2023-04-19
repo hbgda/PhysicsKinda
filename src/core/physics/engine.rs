@@ -7,6 +7,7 @@ use crate::core::rendering::ext::entity::PhysicsEntityExt;
 
 pub struct Engine {
     viewport: Vector<u32>,
+    simulation_boundary: Vector<u32>,
     pub entities: EntityManager,
     pub properties: EngineProperties,
 }
@@ -14,8 +15,9 @@ pub struct Engine {
 impl Engine {
     pub fn new(viewport: Vector<u32>) -> Self {
         Engine {
-            entities: EntityManager::new(),
             viewport,
+            simulation_boundary: viewport,
+            entities: EntityManager::new(),
             properties: EngineProperties::new(
                 Vector::<i32>::new(0, 2)
             ),
@@ -39,43 +41,27 @@ impl Engine {
     {
         // Just basic currently, may eventually be updated to include various physical elements
         // such as air resistance, gravity, acceleration etc
+         self.apply_physics(entity_id);
         
-        // let maybe_entity = self.entities.get_entity_mut(entity_id);
-        // if let None = maybe_entity {
-        //     return Err(format!("Unknown entity of id {:?}", &entity_id))
-        // }
-
-        // let entity = maybe_entity.unwrap();
-        // entity.position += entity.velocity;
-
-        // entity.bound(self.viewport);
-
-        // self.update_entity_collision(entity_id);
-        self.apply_physics(entity_id);
-        
-        // let entity = self.entities.get_entity(entity_id).unwrap();
-        // let mut rect = entity.to_rect(self.viewport);
-        // let step = entity.velocity / Vector::<i32>::new(COLLISION_TICKS as i32, COLLISION_TICKS as i32);
-        // // println!("{:?}", step);
-        // for tick in 0..COLLISION_TICKS {
-        //     let collisions = self.get_collisions(rect);
-        //     if collisions.iter().filter(|id| **id != entity_id).count() > 0 {
-        //         // println!("ID: {:?} Tick {tick} {:?}", entity_id, collisions);
-        //         self.collide_entities(entity_id, collisions);
-        //         break;
-        //     }
-        //     rect.x += step.x();
-        //     rect.y += step.y();
-        //     self.entities.get_entity_mut(entity_id).unwrap().position += step;
-        // }   
-
         self.update_position(entity_id);
 
-        // self.entities.get_entity_mut(entity_id).unwrap().bound(self.viewport);
         Ok(())
+    }
+    
+    fn is_entity_lost(&self, entity_id: EntityID) -> bool {
+        let entity = self.entities.get_entity(entity_id).unwrap();
+
+        entity.position.x() >= self.simulation_boundary.x() as i32 / 2      ||
+        entity.position.x() <= -(self.simulation_boundary.x() as i32) / 2   ||
+        entity.position.y() >= self.simulation_boundary.y() as i32 / 2      ||
+        entity.position.y() <= -(self.simulation_boundary.y() as i32) / 2    
     }
 
     fn update_position(&mut self, entity_id: EntityID) {
+        if self.is_entity_lost(entity_id) {
+            self.entities.destroy(entity_id);
+            return;
+        }
         self.handle_collisions(entity_id);
     }
 
