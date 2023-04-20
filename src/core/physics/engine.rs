@@ -7,7 +7,7 @@ use crate::core::rendering::ext::entity::PhysicsEntityExt;
 
 pub struct Engine {
     viewport: Vector<u32>,
-    simulation_boundary: Vector<u32>,
+    viewport_simulation_offset: Vector<u32>,
     pub entities: EntityManager,
     pub properties: EngineProperties,
 }
@@ -16,7 +16,7 @@ impl Engine {
     pub fn new(viewport: Vector<u32>) -> Self {
         Engine {
             viewport,
-            simulation_boundary: viewport,
+            viewport_simulation_offset: (0, 0).into(),
             entities: EntityManager::new(),
             properties: EngineProperties::new(
                 Vector::<i32>::new(0, 2)
@@ -26,6 +26,17 @@ impl Engine {
 
     pub fn set_viewport(&mut self, width: u32, height: u32) {
         self.viewport.set(width, height);
+    }
+    
+    pub fn set_simulation_boundary(&mut self, x_offset: u32, y_offset: u32) {
+        self.viewport_simulation_offset.set(x_offset, y_offset);
+    }
+
+    pub fn simulated_viewport(&self) -> Vector<u32> {
+        (
+            self.viewport.x() + self.viewport_simulation_offset.x() * 2,
+            self.viewport.y() + self.viewport_simulation_offset.y() * 2
+        ).into()
     }
 }
 
@@ -50,11 +61,12 @@ impl Engine {
     
     fn is_entity_lost(&self, entity_id: EntityID) -> bool {
         let entity = self.entities.get_entity(entity_id).unwrap();
+        let simulated_viewport = self.simulated_viewport();
 
-        entity.position.x() >= self.simulation_boundary.x() as i32 / 2      ||
-        entity.position.x() <= -(self.simulation_boundary.x() as i32) / 2   ||
-        entity.position.y() >= self.simulation_boundary.y() as i32 / 2      ||
-        entity.position.y() <= -(self.simulation_boundary.y() as i32) / 2    
+        entity.position.x() >= simulated_viewport.x() as i32 / 2      ||
+        entity.position.x() <= -(simulated_viewport.x() as i32) / 2   ||
+        entity.position.y() >= simulated_viewport.y() as i32 / 2      ||
+        entity.position.y() <= -(simulated_viewport.y() as i32) / 2    
     }
 
     fn update_position(&mut self, entity_id: EntityID) {
@@ -62,13 +74,17 @@ impl Engine {
             self.entities.destroy(entity_id);
             return;
         }
-        self.handle_collisions(entity_id);
+        if let Some((pos, vel)) = self.handle_collisions(entity_id) {
+           let mut entity = self.entities.get_entity_mut(entity_id).unwrap();
+           entity.position = pos;
+           entity.velocity = vel;
+        }
     }
-
-    fn handle_collisions(&mut self, entity_id: EntityID) -> (i32, i32) {
+                                                                    // Position  // Velocity
+    fn handle_collisions(&mut self, entity_id: EntityID) -> Option<(Vector<i32>, Vector<i32>)> {
         let entity = self.entities.get_entity(entity_id).unwrap();
-        if entity.material.gravity == false {
-            return (0, 0);
+        if entity.velocity == (0, 0).into() {
+            return None;
         }
         let entity_rect = entity.to_rect(Vector::new(0, 0));
 
@@ -121,11 +137,7 @@ impl Engine {
                 }
             }
         }   
-        
-        let entity = self.entities.get_entity_mut(entity_id).unwrap();
-        entity.position = entity_pos;
-        entity.velocity = entity_vel;
-        (0, 0)
+        Some((entity_pos, entity_vel))
     }
 
     fn apply_physics(&mut self, entity_id: EntityID) {

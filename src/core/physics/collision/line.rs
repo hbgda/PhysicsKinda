@@ -40,3 +40,11 @@ pub fn line_intersect(a: Line, b: Line) -> Option<(i32, i32)> {
     }
     None
 }
+
+impl Line {
+    pub fn left_of()
+}
+
+pub fn lines_contain_point(left: Line, right: Line, point: Point) -> bool {
+    
+}
