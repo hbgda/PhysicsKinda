@@ -42,9 +42,20 @@ pub fn line_intersect(a: Line, b: Line) -> Option<(i32, i32)> {
 }
 
 impl Line {
-    pub fn left_of()
+    pub fn left_of(&self, point: Point) -> bool {
+        (self.1.x - self.0.x) * (point.y - self.0.y) - 
+        (self.1.y - self.0.y) * (point.x - self.0.x)
+        > 0
+    }
 }
 
 pub fn lines_contain_point(left: Line, right: Line, point: Point) -> bool {
-    
+    left.left_of(point) && !right.left_of(point)
+}
+
+pub fn lines_contain_line(left: Line, right: Line, contain: Line) -> bool {
+    lines_contain_point(left, right, contain.0)                         || 
+    lines_contain_point(left, right, contain.1)                         ||
+    if let Some(_) = line_intersect(left, contain) {true} else {false}  ||
+    if let Some(_) = line_intersect(right, contain) {true} else {false}
 }

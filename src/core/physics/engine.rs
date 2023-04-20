@@ -1,6 +1,6 @@
 use sdl2::rect::Rect;
 
-use super::{entity_manager::{EntityManager, EntityID, self}, properties::engine_props::EngineProperties, units::{METER, TPS}, entity::PhysicsEntity, collision::{self, line::{Point, Line, line_intersect}, rect::{collide_left, collide_top}}};
+use super::{entity_manager::{EntityManager, EntityID, self}, properties::engine_props::EngineProperties, units::{METER, TPS}, entity::PhysicsEntity, collision::{self, line::{Point, Line, line_intersect, self}, rect::{collide_left, collide_top}}};
 use super::vector::Vector;
 use crate::core::rendering::ext::entity::PhysicsEntityExt;
 
@@ -99,41 +99,14 @@ impl Engine {
         let mut entity_pos = entity.position + entity.velocity;
         let mut entity_vel = entity.velocity;
         for other in &potential_collisions[1..] {
-            let other_rect = other.to_rect((0,0).into());
-            
-            // dbg!(other.position.y(), other_rect.y);
-            
-            if entity.velocity.y() > 0 {
-                let path = Line(
-                    Point { x: entity_rect.x + entity.size.x() as i32 / 2, 
-                            y: entity_rect.y + entity.size.y() as i32 },
-                    Point { x: entity_rect.x + entity.size.x() as i32 / 2 + entity.velocity.x(),
-                            y: entity_rect.y + entity.size.y() as i32 + entity.velocity.y() }
-                );
-                if let Some(_) = collide_top(other_rect, path) {
-                    entity_pos.set(
-                        entity_pos.x(), 
-                        other.position.y() - other.size.y() as i32 / 2
-                        - entity.size.y() as i32 / 2
-                    );
+            let other_rect = other.to_rect((0, 0).into());
+            if let Some((left, right)) = entity.make_path() {
+                if line::lines_contain_line(
+                    left, right, 
+                    Line( Point { x: other_rect.x, y: other_rect.y }, Point { x: other_rect.x + other_rect.width() as i32, y: other_rect.y } )
+                ) {
+                    entity_pos.set(entity_pos.x(), other_rect.y - entity.size.y() as i32 / 2 );
                     entity_vel.set(entity_vel.x(), 0);
-                }
-            }
-            if entity.velocity.x() > 0 {
-
-                let path = Line(
-                    Point { x: entity_rect.x + entity.size.x() as i32 / 2, 
-                            y: entity_rect.y },
-                    Point { x: entity_rect.x + entity.size.x() as i32 / 2 + entity.velocity.x(),
-                            y: entity_rect.y + entity.velocity.y() }
-                );
-                if let Some(_) = collide_left(other_rect, path) {
-                    entity_pos.set(
-                        other.position.x() - other.size.x() as i32 / 2
-                        - entity.size.x() as i32 / 2,
-                        entity_pos.y() 
-                    );
-                    entity_vel.set(0, entity_vel.y());
                 }
             }
         }   
